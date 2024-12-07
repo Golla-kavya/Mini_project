@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}World Education Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f4f4f9;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .charts-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .chart-card {
+        flex: 1;
+        height: 450px;
+        max-width: 48%;
+        background: #fff;
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .chart-title {
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-card {
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+    }
+
+    .table-container {
+        margin-top: 30px;
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 16px;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+
+<div class="container">
+    <h2>World Education Dashboard</h2>
+
+    <div class="charts-container">
+        <!-- Literacy Rate Chart -->
+        <div class="chart-card">
+            <div class="chart-title">Literacy Rate by Country</div>
+            <canvas id="literacyChart" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Enrollment Rate Chart -->
+        <div class="chart-card">
+            <div class="chart-title">Enrollment Rate by Country</div>
+            <canvas id="enrollmentChart" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Primary Education Bar Chart -->
+        <div class="chart-card">
+            <div class="chart-title">Primary Education by Country</div>
+            <canvas id="primaryEducationChart" width="400" height="400"></canvas>
+        </div>
+
+        <!-- Secondary Education Bar Chart -->
+        <div class="chart-card">
+            <div class="chart-title">Secondary Education by Country</div>
+            <canvas id="secondaryEducationChart" width="400" height="400"></canvas>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <h3>Country Educational Data</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Country ID</th>
+                    <th>Country Name</th>
+                    <th>Literacy Rate</th>
+                    <th>Enrollment Rate</th>
+                    <th>Primary Education</th>
+                    <th>Secondary Education</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for country in content %}
+                <tr>
+                    <td>{{ country.country_id }}</td>
+                    <td>{{ country.country_name }}</td>
+                    <td>{{ country.literacy_rate }}%</td>
+                    <td>{{ country.enrollment_rate }}%</td>
+                    <td>{{ country.primary_education }}%</td>
+                    <td>{{ country.secondary_education }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const countries = {{ content | safe }}; // Pass country data to JavaScript
+
+    // Prepare data for Literacy Rate Chart
+    const countryNames = countries.map(country => country.country_name);
+    const literacyRates = countries.map(country => country.literacy_rate);
+
+    // Render Literacy Rate Chart
+    const literacyCtx = document.getElementById('literacyChart').getContext('2d');
+    new Chart(literacyCtx, {
+        type: 'bar',
+        data: {
+            labels: countryNames,
+            datasets: [{
+                label: 'Literacy Rate (%)',
+                data: literacyRates,
+                backgroundColor: '#4caf50',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Prepare data for Enrollment Rate Chart
+    const enrollmentRates = countries.map(country => country.enrollment_rate);
+
+    // Render Enrollment Rate Chart
+    const enrollmentCtx = document.getElementById('enrollmentChart').getContext('2d');
+    new Chart(enrollmentCtx, {
+        type: 'pie',
+        data: {
+            labels: countryNames,
+            datasets: [{
+                label: 'Enrollment Rate (%)',
+                data: enrollmentRates,
+                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56'],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { enabled: true }
+            }
+        }
+    });
+
+    // Prepare data for Primary Education Chart
+    const primaryEducationRates = countries.map(country => country.primary_education);
+
+    // Render Primary Education Bar Chart
+    const primaryEducationCtx = document.getElementById('primaryEducationChart').getContext('2d');
+    new Chart(primaryEducationCtx, {
+        type: 'bar',
+        data: {
+            labels: countryNames,
+            datasets: [{
+                label: 'Primary Education (%)',
+                data: primaryEducationRates,
+                backgroundColor: '#ff9800',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Prepare data for Secondary Education Chart
+    const secondaryEducationRates = countries.map(country => country.secondary_education);
+
+    // Render Secondary Education Bar Chart
+    const secondaryEducationCtx = document.getElementById('secondaryEducationChart').getContext('2d');
+    new Chart(secondaryEducationCtx, {
+        type: 'bar',
+        data: {
+            labels: countryNames,
+            datasets: [{
+                label: 'Secondary Education (%)',
+                data: secondaryEducationRates,
+                backgroundColor: '#2196f3',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
